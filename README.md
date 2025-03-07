@@ -1,66 +1,185 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Stream Records API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Overview
 
-## About Laravel
+This API allows users to manage stream records, including creating, retrieving, updating, and deleting records. It also supports filtering and sorting.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Base URL
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+```
+http://1streamapi.test/api/
+```
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Endpoints
 
-## Learning Laravel
+### 1. Get All Stream Records (With Filtering & Sorting)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+**Endpoint:**
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+```
+GET /records
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**Query Parameters:**
 
-## Laravel Sponsors
+| Parameter       | Type   | Description                                                |
+| --------------- | ------ | ---------------------------------------------------------- |
+| title           | string | Filter by title (case-insensitive)                         |
+| type            | int    | Filter by stream type ID                                   |
+| min\_price      | int    | Filter by minimum token price                              |
+| max\_price      | int    | Filter by maximum token price                              |
+| expires\_before | date   | Filter by expiration date before a given date (YYYY-MM-DD) |
+| expires\_after  | date   | Filter by expiration date after a given date (YYYY-MM-DD)  |
+| sort\_by        | string | Sort by `tokens_price` or `date_expiration`                |
+| sort\_order     | string | Sorting direction (`asc` or `desc`)                        |
+| per\_page       | int    | Number of records per page                                 |
+| page            | int    | Page number                                                |
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+**Example Request:**
 
-### Premium Partners
+```
+GET /records?title=podcast&type=2&min_price=100&expires_before=2025-12-31&sort_by=tokens_price&sort_order=desc&per_page=5&page=1
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+**Response:**
 
-## Contributing
+```json
+{
+    "current_page": 1,
+    "data": [...],
+    "total": 15,
+    "per_page": 5,
+    "last_page": 3,
+    "next_page_url": "http://1streamapi.test/api/records?page=2"
+}
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 2. Get a Single Stream Record
 
-## Code of Conduct
+**Endpoint:**
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```
+GET /records/{id}
+```
 
-## Security Vulnerabilities
+**Example:**
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```
+GET /records/1
+```
 
-## License
+**Response:**
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```json
+{
+    "id": 1,
+    "title": "Sports Match",
+    "description": "Recording of the sports match",
+    "tokens_price": 500,
+    "type": 1,
+    "date_expiration": "2025-12-31 23:59:59"
+}
+```
+
+### 3. Create a Stream Record
+
+**Endpoint:**
+
+```
+POST /records
+```
+
+**Request Body:**
+
+```json
+{
+    "title": "New Stream",
+    "description": "Stream description",
+    "tokens_price": 250,
+    "type": 3,
+    "date_expiration": "2025-12-31 23:59:59"
+}
+```
+
+**Response:**
+
+```json
+{
+    "message": "Record created",
+    "data": {...}
+}
+```
+
+### 4. Update a Stream Record
+
+**Endpoint:**
+
+```
+PUT /records/{id}
+```
+
+**Request Body:** (Only send fields you want to update)
+
+```json
+{
+    "title": "Updated Title"
+}
+```
+
+**Response:**
+
+```json
+{
+    "message": "Record updated",
+    "data": {...}
+}
+```
+
+### 5. Delete a Stream Record
+
+**Endpoint:**
+
+```
+DELETE /records/{id}
+```
+
+**Response:**
+
+```json
+{
+    "message": "Record deleted"
+}
+```
+
+## Pagination
+
+- Default: **10 records per page**
+- Customize with `per_page` and `page` parameters
+
+## Sorting
+
+- Use `sort_by=tokens_price` or `sort_by=date_expiration`
+- Default: Ascending (`asc`), but can specify `sort_order=desc`
+
+## Filtering
+
+- Case-insensitive title search
+- Date range filtering (`expires_before`, `expires_after`)
+- Token price range filtering (`min_price`, `max_price`)
+
+## Setup Instructions
+
+1. Clone the repository
+2. Install dependencies:
+   ```sh
+   composer install
+   ```
+3. Set up the database:
+   ```sh
+   php artisan migrate --seed
+   ```
+4. Run the application:
+   ```sh
+   php artisan serve
+   ```
+
